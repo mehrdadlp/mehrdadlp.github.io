@@ -56,40 +56,38 @@
         //toggle list
         $(document).on('click','.pSelect',antiDoubleClick(function(e) {
             if(e.target !== search) {
-                $(this).find('.pSelect-wrapper').toggleClass('open');
-                $('body').toggleClass('pSelect-is-open');
-                if($('body').hasClass('pSelect-is-open')) {
-                    try {
-                        console.log(search.focus());
-                    } catch(e) {console.log(e)}
-
-
-                }
+                toggleList.call(this);
             }
         },300));
 
+        function toggleList() {
+            console.log(this);
+            $(this).find('.pSelect-wrapper').toggleClass('open');
+            $('body').toggleClass('pSelect-is-open');
+            if($('body').hasClass('pSelect-is-open')) {
+                try {
+                    console.log(search.focus());
+                } catch(e) {console.log(e)}
+
+
+            }
+        }
+
         //bind keyboard
         $(document).on('keydown','.pSelect-is-open',function(e) {
-            var code;
-            if (e.key !== undefined) {
-                code = e.key;
-            } else if (e.keyIdentifier !== undefined) {
-                code = e.keyIdentifier;
-            } else if (e.keyCode !== undefined) {
-                code = e.keyCode;
-            }
-            switch(code) {
-                case 40:
+            console.log(e.keyCode);
+            console.log(e.key);
+            switch(e.key) {
+                case 'ArrowDown':
                     e.preventDefault();
                     var selected = $pSelect.find('li.pS-active');
                     if(selected.length) {
                         selected.removeClass('pS-active').next(':not(.hide)').addClass('pS-active');
                     } else {
-                        debugger;
                         $pSelect.find('li:eq(0):not(.hide)').addClass('pS-active');
                     }
                     break;
-                case 38:
+                case 'ArrowUp':
                     e.preventDefault();
                     var selected = $pSelect.find('li.pS-active');
                     if(selected.length) {
@@ -98,10 +96,13 @@
                         $pSelect.find('li:last:not(.hide)').addClass('pS-active');
                     }
                     break;
-                case 13:
+                case 'Enter':
                     e.preventDefault();
                     $pSelect.find('li.pS-active').click();
                     break;
+                case 'Escape':
+                    e.preventDefault();
+                    toggleList.call($pSelect);
                 default:
 
                     break;
