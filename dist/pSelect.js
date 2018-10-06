@@ -15,7 +15,6 @@ function type(a) {
             //bury select box
             $(this).hide();
             var $select = $(this);
-            // console.log('burry:', $select);
 
             //create new pSelect container
             var $pSelect = $("<div>", {class: "pSelect"});
@@ -50,6 +49,8 @@ function type(a) {
                 var option = document.createElement('li');
                 option.textContent  = item.textContent;
                 //option.value        = item.value;
+                item.selected && option.classList.add("pS-active");
+                item.disabled && option.classList.add("pS-disabled");
                 var attr = document.createAttribute('data-value');
                 attr.value = item.value;
                 option.setAttributeNode(attr);
@@ -57,6 +58,7 @@ function type(a) {
             });
             wrapper.appendChild(wrapperUL);
             $pSelect[0].appendChild(wrapper);
+            select($pSelect.find('.pS-active'), {preventDefault: function() {}});
 
 
 
@@ -67,12 +69,11 @@ function type(a) {
             //         toggleList.call(this);
             //     }
             // },300));
-            $pSelect.click(function(e) {
-                console.log(this);
+            $pSelect.click(antiDoubleClick(function(e) {
                 if (e.target !== search) {
                     toggleList.call(this);
                 }
-            });
+            }, 300));
 
             function toggleList(cmd) {
                 if (typeof(cmd) === 'undefined') {
@@ -135,13 +136,29 @@ function type(a) {
             //select item
             $(wrapper).on('click','li',function(e) {
                 if(e.target !== searchBox && e.target !== search) {
-                    select($(this));
+                    select($(this), e, true);
                 }
             });
-            function select($element) {
-                $select.val($element.attr('data-value')).trigger('change');
+            function select($element, e, changeSelect) {
+                if($element.hasClass('pS-disabled')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                changeSelect && $select.val($element.attr('data-value')).trigger('change');
                 $pS_box.text($element.text());
             }
+
+            // update on programmatically changes:
+            // --dispatch update event to pSelect
+            $select.on('change', function() {
+                $pSelect.trigger('pSelect:update', false);
+            });
+            // --listen for changes
+            $pSelect.on('pSelect:update', function(e, changeSelect) {
+                select($pSelect.find('li:eq('+$select.get(0).selectedIndex+')'), e, changeSelect);
+            });
+
 
             //search
             //bind search

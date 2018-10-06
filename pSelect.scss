@@ -1,5 +1,6 @@
 .pSelect {
   position:relative;
+  font-family: "Raleway", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   .hide {
     display:none;
@@ -70,6 +71,22 @@
       input[type=text] {
         width:100%;
         margin:0;
+
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        height: 38px;
+        padding: 6px 10px;
+        background-color: #fff;
+        border: 1px solid #D1D1D1;
+        border-radius: 4px;
+        box-shadow: none;
+        box-sizing: border-box;
+
+        &:focus {
+          border: 1px solid #33C3F0;
+          outline: 0;
+        }
       }
     }
 
@@ -77,12 +94,16 @@
       max-height:250px;
       overflow-y:auto;
       text-align:left;
+      padding:0;
+      margin:0;
+      margin-top:5px;
     }
 
 
     li {
       line-height:3em;
       padding: 0 10px;
+      margin:0;
       cursor:pointer;
       list-style:none;
 
@@ -92,6 +113,10 @@
       }
       &.pS-active {
         background-color:lightskyblue;
+      }
+      &.pS-disabled {
+        opacity: 0.4;
+        cursor:not-allowed;
       }
     }
   }
