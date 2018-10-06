@@ -3,8 +3,8 @@
   
   
   
-pretty select (pSelect) is a component to stylize html <select> tag  
-the project is still under development.  
+pretty select (pSelect) is a component to stylize html &lt;select&gt; tag <Enter>
+the project is still under development. <Enter>
 these features are implemented for now  
  - search field  
  - keyboard navigation between options  
