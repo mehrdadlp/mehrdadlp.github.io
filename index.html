@@ -5,8 +5,8 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
-
+    <title>Pretty Select</title>
+    <link rel="stylesheet" href="dist/pSelect.css">
 </head>
 <body>
 <br><br><br>
@@ -24,13 +24,17 @@
         <pre>
         $('.compile-to-javascript').pSelect();
     </pre>
-    <select class="CompileToJavascript">
-        <option value="TypeScript">TypeScript</option>
-        <option value="CoffeeScript">CoffeeScript</option>
-        <option value="Elm">Elm</option>
-        <option value="ClojureScript">ClojureScript</option>
-        <option value="Haxe">Haxe</option>
-    </select>
+    <div class="row">
+        <div class="three columns">
+            <select class="compile-to-javascript">
+                <option value="TypeScript" selected>TypeScript</option>
+                <option value="CoffeeScript">CoffeeScript</option>
+                <option value="Elm">Elm</option>
+                <option value="ClojureScript">ClojureScript</option>
+                <option value="Haxe">Haxe</option>
+            </select>
+        </div>
+    </div>
 </div>
 
 <script
