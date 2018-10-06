@@ -14,6 +14,33 @@
     <h1>Pretty Select</h1>
     <p>html &lt;select&gt; with pretty UI, search capability and ajax loading.</p>
 </div>
+<div class="container">
+    <h2>demo</h2>
+    <pre>
+        &lt;link rel="stylesheet" href="pSelect.css"&gt;&lt;
+        &lt;script src="jquery.js"&gt;&lt;/script&gt;<br>
+        &lt;script src="pSelect.js"&gt;&lt;/script&gt;<br>
+    </pre>
+        <pre>
+        $('.compile-to-javascript').pSelect();
+    </pre>
+    <select class="CompileToJavascript">
+        <option value="TypeScript">TypeScript</option>
+        <option value="CoffeeScript">CoffeeScript</option>
+        <option value="Elm">Elm</option>
+        <option value="ClojureScript">ClojureScript</option>
+        <option value="Haxe">Haxe</option>
+    </select>
+</div>
+
+<script
+        src="https://code.jquery.com/jquery-2.2.4.min.js"
+        integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+        crossorigin="anonymous"></script>
+<script src="pSelect.js"></script>
+<script>
+    $('.compile-to-javascript').pSelect();
+</script>
 
 <style>
     /*
