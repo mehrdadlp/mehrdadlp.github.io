@@ -188,7 +188,7 @@ function type(a) {
 
                 var nodes = document.querySelectorAll(selector);
                 for(var i=0;i<nodes.length;i++) {
-                    if(!~nodes[i].textContent.search(new RegExp(term,'gi'))) {
+                    if(!~nodes[i].textContent.search(new RegExp(escapeRegExp(term),'gi'))) {
                         nodes[i].classList.add('hide');
                     } else {
                         nodes[i].classList.remove('hide');
@@ -222,6 +222,10 @@ function type(a) {
                         running = false;
                     }, delay);
                 }
+            }
+
+            function escapeRegExp(text) {
+                return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
             }
         });
 
