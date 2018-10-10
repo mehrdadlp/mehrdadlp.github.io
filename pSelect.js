@@ -13,8 +13,9 @@ function type(a) {
             },$.fn.pSelect.defaults,params);
 
             //bury select box
-            $(this).hide();
             var $select = $(this);
+            $select.hide();
+            var old_select = this;
 
             //create new pSelect container
             var $pSelect = $("<div>", {class: "pSelect"});
@@ -23,12 +24,10 @@ function type(a) {
                 'font-size':    options.baseSize,
                 'text-align':   options.align
             });
-            // console.log('new pSelect container:', $pSelect);
 
             //pSelect fake representation markup
             var $pS_box = $("<div>",{class: "pSelect-box"}).text(options.placeholder);
             $pS_box.appendTo($pSelect);
-            // console.log('pSelect fake representation markup:', $pS_box);
 
 
             //create dropdown: lay options | put searchbox
@@ -44,31 +43,36 @@ function type(a) {
                 wrapper.appendChild(searchBox);
             }
 
-            var wrapperUL = document.createElement('ul');
-            $(this).find('option').each(function(i,item) {
-                var option = document.createElement('li');
-                option.textContent  = item.textContent;
-                //option.value        = item.value;
-                item.selected && option.classList.add("pS-active");
-                item.disabled && option.classList.add("pS-disabled");
-                var attr = document.createAttribute('data-value');
-                attr.value = item.value;
-                option.setAttributeNode(attr);
-                wrapperUL.appendChild(option);
-            });
-            wrapper.appendChild(wrapperUL);
-            $pSelect[0].appendChild(wrapper);
-            select($pSelect.find('.pS-active'), {preventDefault: function() {}});
 
+            function layLies(permanentize) {
+                var wrapperUL = document.createElement('ul');
+                $select.find('option').each(function (i, item) {
+                    //item.classList.add('pS-permanent');
+                    var option = document.createElement('li');
+                    option.textContent = item.textContent;
+                    //option.value        = item.value;
+                    item.selected && option.classList.add("pS-active");
+                    item.disabled && option.classList.add("pS-disabled");
 
+                    if ( options.ajax.url !== '' && permanentize ) {
+                        item.classList.add('pS-permanent');
+                    }
 
-            //toggle list
-            // $(document).on('click','.pSelect',antiDoubleClick(function(e) {
-            //     console.log(this);
-            //     if(e.target !== search) {
-            //         toggleList.call(this);
-            //     }
-            // },300));
+                    var attr = document.createAttribute('data-value');
+                    attr.value = item.value;
+                    option.setAttributeNode(attr);
+                    wrapperUL.appendChild(option);
+                });
+                wrapper.appendChild(wrapperUL);
+                $pSelect.find('ul').remove();
+                $pSelect[0].appendChild(wrapper);
+                select($pSelect.find('.pS-active'), {
+                    preventDefault: function () {
+                    }
+                });
+            }
+            layLies(true);
+
             $pSelect.click(antiDoubleClick(function(e) {
                 if (e.target !== search) {
                     toggleList.call(this);
@@ -162,7 +166,7 @@ function type(a) {
 
             //search
             //bind search
-            if(options.search.enable) {
+            if(options.search.enable && !options.ajax.url) {
                 search.addEventListener('input',function() {
                     filterOptions('.pSelect-wrapper li',search.value);
                 });
@@ -170,9 +174,36 @@ function type(a) {
 
             //ajax search
             if(options.ajax.url) {
-                $.get(options.ajax.url,function() {
+                $(search).keyup(debounce(function() {
+                    if(this.value.length > 3) {
+                        $.get(options.ajax.url + search.value, function (data) {
 
-                });
+                            $select.find('option:not(.pS-permanent)').remove();
+
+                            for (var key in data) {
+                                var item = data[key];
+                                if (typeof(options.ajax.handleResults) === 'function') {
+                                    item = options.ajax.handleResults(item);
+                                } else {
+                                    item = {
+                                        value: item,
+                                        title: item
+                                    }
+                                }
+                                var option = document.createElement('option');
+                                option.textContent = item.title;
+                                option.value = item.value;
+                                //console.log(option);
+
+                                old_select.appendChild(option);
+                            }
+
+                            layLies(false);
+
+                            //place_items(data);
+                        }.timer('ajax lay', 5));
+                    }
+                }, 700));
             }
 
 
@@ -206,8 +237,6 @@ function type(a) {
 
             }
 
-
-
             function antiDoubleClick (fn, delay) {
                 var timeoutID = null;
                 var running = false;
@@ -227,6 +256,20 @@ function type(a) {
             function escapeRegExp(text) {
                 return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
             }
+
+            function debounce(n, t) {
+                var i;
+                return function() {
+                    var r = this
+                        , u = arguments
+                        , f = function() {
+                        i = null;
+                        n.apply(r, u)
+                    };
+                    clearTimeout(i);
+                    i = setTimeout(f, t)
+                }
+            }
         });
 
 
@@ -245,4 +288,3 @@ function type(a) {
     }
 
 })(jQuery);
-

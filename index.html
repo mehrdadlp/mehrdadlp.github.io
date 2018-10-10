@@ -53,7 +53,17 @@
         crossorigin="anonymous"></script>
 <script src="pSelect.js"></script>
 <script>
-    $('.compile-to-javascript').pSelect();
+    $('.compile-to-javascript').pSelect({
+        ajax: {
+            url: "http://piardo.tk/api/area?q=",
+            handleResults: function(item) {
+                return {
+                    value:item,
+                    title:item
+                };
+            }
+        }
+    });
 </script>
 
 <style>
