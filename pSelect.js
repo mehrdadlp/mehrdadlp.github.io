@@ -43,10 +43,10 @@ function type(a) {
                 wrapper.appendChild(searchBox);
             }
 
-
+            var wrapperUL;
             function layLies(permanentize) {
                 $pSelect.find('ul').remove();
-                var wrapperUL = document.createElement('ul');
+                wrapperUL = document.createElement('ul');
                 $select.find('option').each(function (i, item) {
                     var option = document.createElement('li');
 
@@ -97,7 +97,6 @@ function type(a) {
                     try {
                         setTimeout(function() {
                             search.focus();
-                            console.log(document.activeElement);
                         },100);
 
                     } catch(e) {console.log(e)}
@@ -105,22 +104,45 @@ function type(a) {
             }
 
             //bind keyboard
+            var list_height = wrapperUL.clientHeight;
             $(document).on('keydown','.pSelect-is-open',function(e) {
+                var scroll = wrapperUL.scrollTop;
                 switch(e.key) {
                     case 'ArrowDown':
                         e.preventDefault();
-                        var selected = $pSelect.find('.open .pS-active');
-                        if(selected.length) {
-                            selected.removeClass('pS-active').next(':not(.hide)').addClass('pS-active');
+                        var $selected = $pSelect.find('.open .pS-active');
+                        if($selected.length) {
+                            $selected.removeClass('pS-active');
+                            $selected = $selected.next(':not(.hide)');
+                            $selected = $selected.length ? $selected : $(wrapperUL.querySelector(':first-child'));
+                            $selected.addClass('pS-active');
+                            if( scroll + list_height + 42 < $selected[0].offsetTop ) {
+                                wrapperUL.scrollTop += 42;
+                            } else if( scroll > $selected[0].offsetTop ) {
+                                wrapperUL.scrollTop = 0;
+                            }
                         } else {
                             $pSelect.find('.open li:eq(0):not(.hide)').addClass('pS-active');
+                            wrapperUL.scrollTop = 0;
                         }
                         break;
                     case 'ArrowUp':
                         e.preventDefault();
-                        var selected = $pSelect.find('.open li.pS-active');
-                        if(selected.length) {
-                            selected.removeClass('pS-active').prev(':not(.hide)').addClass('pS-active');
+                        var $selected = $pSelect.find('.open li.pS-active');
+                        if($selected.length) {
+                            $selected.removeClass('pS-active');
+                            $selected = $selected.prev(':not(.hide)');
+                            window.tmp = $selected;
+                            window.wrapper = wrapperUL;
+                            $selected = $selected.length ? $selected : $(wrapperUL.querySelector(':last-child'));
+                            $selected.addClass('pS-active');
+
+
+                            if( $selected[0].offsetTop - scroll < 100 ) {
+                                wrapperUL.scrollTop -= 42;
+                            } else if($selected[0].offsetTop > list_height && scroll == 0) {
+                                wrapperUL.scrollTop = wrapperUL.scrollHeight;
+                            }
                         } else {
                             $pSelect.find('.open li:last:not(.hide)').addClass('pS-active');
                         }
