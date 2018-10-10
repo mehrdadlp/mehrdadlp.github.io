@@ -56,6 +56,8 @@
     $('.compile-to-javascript').pSelect({
         ajax: {
             url: "https://jsonplaceholder.typicode.com/users#",
+            delay: 500,
+            minChars: 2,
             handleResults: function(item) {
                 return {
                     value: item.id,

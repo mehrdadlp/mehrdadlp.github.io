@@ -198,7 +198,7 @@ function type(a) {
             //ajax search
             if(options.ajax.url) {
                 $(search).keyup(debounce(function() {
-                    if(this.value.length > 3) {
+                    if(this.value.length > options.ajax.minChars) {
                         $.get(options.ajax.url + search.value, function (data) {
 
                             $select.find('option:not(.pS-permanent)').remove();
@@ -222,7 +222,7 @@ function type(a) {
                             layLies(false);
                         });
                     }
-                }, 700));
+                }, options.ajax.delay));
             }
 
             function filterOptions(selector, term) {
@@ -284,7 +284,9 @@ function type(a) {
             placeholder:'Enter 3 characters at least'
         },
         ajax: {
-            url: false
+            url: false,
+            delay: 500,
+            minChars:3
         }
     }
 
