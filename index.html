@@ -55,11 +55,11 @@
 <script>
     $('.compile-to-javascript').pSelect({
         ajax: {
-            url: "http://piardo.tk/api/area?q=",
+            url: "https://jsonplaceholder.typicode.com/users#",
             handleResults: function(item) {
                 return {
-                    value:item,
-                    title:item
+                    value:item.id,
+                    title:item.name
                 };
             }
         }

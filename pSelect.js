@@ -45,16 +45,16 @@ function type(a) {
 
 
             function layLies(permanentize) {
+                $pSelect.find('ul').remove();
                 var wrapperUL = document.createElement('ul');
                 $select.find('option').each(function (i, item) {
-                    //item.classList.add('pS-permanent');
                     var option = document.createElement('li');
+
                     option.textContent = item.textContent;
-                    //option.value        = item.value;
                     item.selected && option.classList.add("pS-active");
                     item.disabled && option.classList.add("pS-disabled");
 
-                    if ( options.ajax.url !== '' && permanentize ) {
+                    if ( permanentize && options.ajax.url !== '' ) {
                         item.classList.add('pS-permanent');
                     }
 
@@ -63,13 +63,10 @@ function type(a) {
                     option.setAttributeNode(attr);
                     wrapperUL.appendChild(option);
                 });
+
                 wrapper.appendChild(wrapperUL);
-                $pSelect.find('ul').remove();
                 $pSelect[0].appendChild(wrapper);
-                select($pSelect.find('.pS-active'), {
-                    preventDefault: function () {
-                    }
-                });
+                select($pSelect.find('.pS-active'), { preventDefault: function () {} });
             }
             layLies(true);
 
@@ -98,7 +95,11 @@ function type(a) {
                     }
                     caller_element.addClass('open');
                     try {
-                        console.log(search.focus());
+                        setTimeout(function() {
+                            search.focus();
+                            console.log(document.activeElement);
+                        },100);
+
                     } catch(e) {console.log(e)}
                 }
             }
@@ -193,29 +194,16 @@ function type(a) {
                                 var option = document.createElement('option');
                                 option.textContent = item.title;
                                 option.value = item.value;
-                                //console.log(option);
-
                                 old_select.appendChild(option);
                             }
 
                             layLies(false);
-
-                            //place_items(data);
-                        }.timer('ajax lay', 5));
+                        });
                     }
                 }, 700));
             }
 
-
-
-            // var searchTime = {
-            //     t0: 0,
-            //     t1: 0,
-            //     diffs: [],
-            //     avg:0
-            // };
             function filterOptions(selector, term) {
-                // searchTime.t0 = window.performance.now();
 
                 var nodes = document.querySelectorAll(selector);
                 for(var i=0;i<nodes.length;i++) {
@@ -225,15 +213,6 @@ function type(a) {
                         nodes[i].classList.remove('hide');
                     }
                 }
-                // searchTime.t1 = window.performance.now();
-                // debugger;
-                // if(searchTime.diffs.length<=10) {
-                //     searchTime.diffs.push(searchTime.t1 - searchTime.t0);
-                // } else {
-                //     searchTime.avg = searchTime.diffs.reduce(function(a,b){return a+b;}).log() / searchTime.diffs.length
-                //     console.log(searchTime.avg);
-                //     searchTime.diffs =[];
-                // }
 
             }
 
