@@ -67,6 +67,7 @@ function type(a) {
                 wrapper.appendChild(wrapperUL);
                 $pSelect[0].appendChild(wrapper);
                 select($pSelect.find('.pS-active'), { preventDefault: function () {} });
+                search.focus();
             }
             layLies(true);
 
