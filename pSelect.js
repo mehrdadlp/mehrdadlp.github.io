@@ -7,7 +7,7 @@ function type(a) {
     $.fn.pSelect = function(params) {
         console.time('lay');
         return this.each(function() {
-            var options = $.extend({
+            var options = $.extend(true, {
                 //override defaults (lowest order)
                 placeholder:$(this).attr('placeholder')
             },$.fn.pSelect.defaults,params);
@@ -67,7 +67,9 @@ function type(a) {
                 wrapper.appendChild(wrapperUL);
                 $pSelect[0].appendChild(wrapper);
                 select($pSelect.find('.pS-active'), { preventDefault: function () {} });
-                search.focus();
+                setTimeout(function() {
+                    search.focus();
+                });
             }
             layLies(true);
 
@@ -105,26 +107,26 @@ function type(a) {
             }
 
             //bind keyboard
-            var list_height = wrapperUL.clientHeight;
             $(document).on('keydown','.pSelect-is-open',function(e) {
-                var scroll = wrapperUL.scrollTop;
+                var list_height = wrapperUL.clientHeight;
+                var scrolled = list_height + 25 < wrapperUL.scrollHeight;
+                var scroll = false; //wrapperUL.scrollTop;
                 switch(e.key) {
                     case 'ArrowDown':
                         e.preventDefault();
-                        var $selected = $pSelect.find('.open .pS-active');
+                        var $selected = $pSelect.find('.open .pS-active').removeClass('pS-active');
                         if($selected.length) {
-                            $selected.removeClass('pS-active');
                             $selected = $selected.next(':not(.hide)');
                             $selected = $selected.length ? $selected : $(wrapperUL.querySelector(':first-child'));
                             $selected.addClass('pS-active');
-                            if( scroll + list_height + 42 < $selected[0].offsetTop ) {
+                            if( scrolled && (scroll + list_height + 42 < $selected[0].offsetTop) ) {
                                 wrapperUL.scrollTop += 42;
-                            } else if( scroll > $selected[0].offsetTop ) {
+                            } else if( scrolled && (scroll > $selected[0].offsetTop) ) {
                                 wrapperUL.scrollTop = 0;
                             }
                         } else {
                             $pSelect.find('.open li:eq(0):not(.hide)').addClass('pS-active');
-                            wrapperUL.scrollTop = 0;
+                            scrolled && (wrapperUL.scrollTop = 0);
                         }
                         break;
                     case 'ArrowUp':
@@ -139,9 +141,9 @@ function type(a) {
                             $selected.addClass('pS-active');
 
 
-                            if( $selected[0].offsetTop - scroll < 100 ) {
+                            if( scrolled && ($selected[0].offsetTop - scroll < 100) ) {
                                 wrapperUL.scrollTop -= 42;
-                            } else if($selected[0].offsetTop > list_height && scroll == 0) {
+                            } else if( scrolled && ($selected[0].offsetTop > list_height && scroll == 0) ) {
                                 wrapperUL.scrollTop = wrapperUL.scrollHeight;
                             }
                         } else {
@@ -155,10 +157,9 @@ function type(a) {
                     case 'Escape':
                         e.preventDefault();
                         toggleList.call($pSelect, 'close');
-                    default:
-
                         break;
                 }
+
             });
 
             //select item
@@ -197,8 +198,12 @@ function type(a) {
             }
 
             //ajax search
+            var reserved_keys = ['ArrowUp', 'ArrowDown', 'Enter', 'Escape'];
             if(options.ajax.url) {
-                $(search).keyup(debounce(function() {
+                $(search).keyup(debounce(function(e) {
+                    if(~reserved_keys.indexOf(e.key)) {
+                        return;
+                    }
                     if(this.value.length > options.ajax.minChars) {
                         $.get(options.ajax.url + search.value, function (data) {
 
@@ -292,3 +297,5 @@ function type(a) {
     }
 
 })(jQuery);
+
+__ = console.log.bind(console);
