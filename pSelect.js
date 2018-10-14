@@ -37,9 +37,16 @@ function type(a) {
                 var search = document.createElement('input');
                 search.type='text';
                 search.placeholder = options.search.placeholder;
+
+                var preloader = document.createElement('div');
+                preloader.classList.add('pSelect-preloader');
+                preloader.innerHTML = options.ajax.preloader;
+
                 var searchBox = document.createElement('div');
                 searchBox.classList.add('search-box');
+
                 searchBox.appendChild(search);
+                searchBox.appendChild(preloader);
                 wrapper.appendChild(searchBox);
             }
 
@@ -73,10 +80,10 @@ function type(a) {
             }
             layLies(true);
 
-            $pSelect.click(antiDoubleClick(function(e) {
-                if (e.target !== search) {
-                    toggleList.call(this);
-                }
+            $pS_box.click(antiDoubleClick(function(e) {
+                // if (e.target !== search && e.target !== preloader) {
+                    toggleList.call(this.parentNode);
+                // }
             }, 300));
 
             function toggleList(cmd) {
@@ -166,6 +173,7 @@ function type(a) {
             $(wrapper).on('click','li',function(e) {
                 if(e.target !== searchBox && e.target !== search) {
                     select($(this), e, true);
+                    toggleList.call(this.parentNode.parentNode.parentNode, 'close');
                 }
             });
             function select($element, e, changeSelect) {
@@ -205,7 +213,9 @@ function type(a) {
                         return;
                     }
                     if(this.value.length > options.ajax.minChars) {
+                        preloader.classList.add('loading');
                         $.get(options.ajax.url + search.value, function (data) {
+                            preloader.classList.remove('loading');
 
                             $select.find('option:not(.pS-permanent)').remove();
 
@@ -292,10 +302,11 @@ function type(a) {
         ajax: {
             url: false,
             delay: 500,
-            minChars:3
+            minChars:3,
+            preloader: '<div class="cssload-container">\
+	                        <div class="cssload-item cssload-moon"></div>\
+                        </div>',
         }
     }
 
 })(jQuery);
-
-__ = console.log.bind(console);

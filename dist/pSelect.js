@@ -7,14 +7,15 @@ function type(a) {
     $.fn.pSelect = function(params) {
         console.time('lay');
         return this.each(function() {
-            var options = $.extend({
+            var options = $.extend(true, {
                 //override defaults (lowest order)
                 placeholder:$(this).attr('placeholder')
             },$.fn.pSelect.defaults,params);
 
             //bury select box
-            $(this).hide();
             var $select = $(this);
+            $select.hide();
+            var old_select = this;
 
             //create new pSelect container
             var $pSelect = $("<div>", {class: "pSelect"});
@@ -23,12 +24,10 @@ function type(a) {
                 'font-size':    options.baseSize,
                 'text-align':   options.align
             });
-            // console.log('new pSelect container:', $pSelect);
 
             //pSelect fake representation markup
             var $pS_box = $("<div>",{class: "pSelect-box"}).text(options.placeholder);
             $pS_box.appendTo($pSelect);
-            // console.log('pSelect fake representation markup:', $pS_box);
 
 
             //create dropdown: lay options | put searchbox
@@ -38,41 +37,53 @@ function type(a) {
                 var search = document.createElement('input');
                 search.type='text';
                 search.placeholder = options.search.placeholder;
+
+                var preloader = document.createElement('div');
+                preloader.classList.add('pSelect-preloader');
+                preloader.innerHTML = options.ajax.preloader;
+
                 var searchBox = document.createElement('div');
                 searchBox.classList.add('search-box');
+
                 searchBox.appendChild(search);
+                searchBox.appendChild(preloader);
                 wrapper.appendChild(searchBox);
             }
 
-            var wrapperUL = document.createElement('ul');
-            $(this).find('option').each(function(i,item) {
-                var option = document.createElement('li');
-                option.textContent  = item.textContent;
-                //option.value        = item.value;
-                item.selected && option.classList.add("pS-active");
-                item.disabled && option.classList.add("pS-disabled");
-                var attr = document.createAttribute('data-value');
-                attr.value = item.value;
-                option.setAttributeNode(attr);
-                wrapperUL.appendChild(option);
-            });
-            wrapper.appendChild(wrapperUL);
-            $pSelect[0].appendChild(wrapper);
-            select($pSelect.find('.pS-active'), {preventDefault: function() {}});
+            var wrapperUL;
+            function layLies(permanentize) {
+                $pSelect.find('ul').remove();
+                wrapperUL = document.createElement('ul');
+                $select.find('option').each(function (i, item) {
+                    var option = document.createElement('li');
 
+                    option.textContent = item.textContent;
+                    item.selected && option.classList.add("pS-active");
+                    item.disabled && option.classList.add("pS-disabled");
 
+                    if ( permanentize && options.ajax.url !== '' ) {
+                        item.classList.add('pS-permanent');
+                    }
 
-            //toggle list
-            // $(document).on('click','.pSelect',antiDoubleClick(function(e) {
-            //     console.log(this);
-            //     if(e.target !== search) {
-            //         toggleList.call(this);
-            //     }
-            // },300));
-            $pSelect.click(antiDoubleClick(function(e) {
-                if (e.target !== search) {
-                    toggleList.call(this);
-                }
+                    var attr = document.createAttribute('data-value');
+                    attr.value = item.value;
+                    option.setAttributeNode(attr);
+                    wrapperUL.appendChild(option);
+                });
+
+                wrapper.appendChild(wrapperUL);
+                $pSelect[0].appendChild(wrapper);
+                select($pSelect.find('.pS-active'), { preventDefault: function () {} });
+                setTimeout(function() {
+                    search.focus();
+                });
+            }
+            layLies(true);
+
+            $pS_box.click(antiDoubleClick(function(e) {
+                // if (e.target !== search && e.target !== preloader) {
+                    toggleList.call(this.parentNode);
+                // }
             }, 300));
 
             function toggleList(cmd) {
@@ -94,28 +105,54 @@ function type(a) {
                     }
                     caller_element.addClass('open');
                     try {
-                        console.log(search.focus());
+                        setTimeout(function() {
+                            search.focus();
+                        },100);
+
                     } catch(e) {console.log(e)}
                 }
             }
 
             //bind keyboard
             $(document).on('keydown','.pSelect-is-open',function(e) {
+                var list_height = wrapperUL.clientHeight;
+                var scrolled = list_height + 25 < wrapperUL.scrollHeight;
+                var scroll = false; //wrapperUL.scrollTop;
                 switch(e.key) {
                     case 'ArrowDown':
                         e.preventDefault();
-                        var selected = $pSelect.find('.open .pS-active');
-                        if(selected.length) {
-                            selected.removeClass('pS-active').next(':not(.hide)').addClass('pS-active');
+                        var $selected = $pSelect.find('.open .pS-active').removeClass('pS-active');
+                        if($selected.length) {
+                            $selected = $selected.next(':not(.hide)');
+                            $selected = $selected.length ? $selected : $(wrapperUL.querySelector(':first-child'));
+                            $selected.addClass('pS-active');
+                            if( scrolled && (scroll + list_height + 42 < $selected[0].offsetTop) ) {
+                                wrapperUL.scrollTop += 42;
+                            } else if( scrolled && (scroll > $selected[0].offsetTop) ) {
+                                wrapperUL.scrollTop = 0;
+                            }
                         } else {
                             $pSelect.find('.open li:eq(0):not(.hide)').addClass('pS-active');
+                            scrolled && (wrapperUL.scrollTop = 0);
                         }
                         break;
                     case 'ArrowUp':
                         e.preventDefault();
-                        var selected = $pSelect.find('.open li.pS-active');
-                        if(selected.length) {
-                            selected.removeClass('pS-active').prev(':not(.hide)').addClass('pS-active');
+                        var $selected = $pSelect.find('.open li.pS-active');
+                        if($selected.length) {
+                            $selected.removeClass('pS-active');
+                            $selected = $selected.prev(':not(.hide)');
+                            window.tmp = $selected;
+                            window.wrapper = wrapperUL;
+                            $selected = $selected.length ? $selected : $(wrapperUL.querySelector(':last-child'));
+                            $selected.addClass('pS-active');
+
+
+                            if( scrolled && ($selected[0].offsetTop - scroll < 100) ) {
+                                wrapperUL.scrollTop -= 42;
+                            } else if( scrolled && ($selected[0].offsetTop > list_height && scroll == 0) ) {
+                                wrapperUL.scrollTop = wrapperUL.scrollHeight;
+                            }
                         } else {
                             $pSelect.find('.open li:last:not(.hide)').addClass('pS-active');
                         }
@@ -127,16 +164,16 @@ function type(a) {
                     case 'Escape':
                         e.preventDefault();
                         toggleList.call($pSelect, 'close');
-                    default:
-
                         break;
                 }
+
             });
 
             //select item
             $(wrapper).on('click','li',function(e) {
                 if(e.target !== searchBox && e.target !== search) {
                     select($(this), e, true);
+                    toggleList.call(this.parentNode.parentNode.parentNode, 'close');
                 }
             });
             function select($element, e, changeSelect) {
@@ -162,51 +199,60 @@ function type(a) {
 
             //search
             //bind search
-            if(options.search.enable) {
+            if(options.search.enable && !options.ajax.url) {
                 search.addEventListener('input',function() {
                     filterOptions('.pSelect-wrapper li',search.value);
                 });
             }
 
             //ajax search
+            var reserved_keys = ['ArrowUp', 'ArrowDown', 'Enter', 'Escape'];
             if(options.ajax.url) {
-                $.get(options.ajax.url,function() {
+                $(search).keyup(debounce(function(e) {
+                    if(~reserved_keys.indexOf(e.key)) {
+                        return;
+                    }
+                    if(this.value.length > options.ajax.minChars) {
+                        preloader.classList.add('loading');
+                        $.get(options.ajax.url + search.value, function (data) {
+                            preloader.classList.remove('loading');
 
-                });
+                            $select.find('option:not(.pS-permanent)').remove();
+
+                            for (var key in data) {
+                                var item = data[key];
+                                if (typeof(options.ajax.handleResults) === 'function') {
+                                    item = options.ajax.handleResults(item);
+                                } else {
+                                    item = {
+                                        value: item,
+                                        title: item
+                                    }
+                                }
+                                var option = document.createElement('option');
+                                option.textContent = item.title;
+                                option.value = item.value;
+                                old_select.appendChild(option);
+                            }
+
+                            layLies(false);
+                        });
+                    }
+                }, options.ajax.delay));
             }
 
-
-
-            // var searchTime = {
-            //     t0: 0,
-            //     t1: 0,
-            //     diffs: [],
-            //     avg:0
-            // };
             function filterOptions(selector, term) {
-                // searchTime.t0 = window.performance.now();
 
                 var nodes = document.querySelectorAll(selector);
                 for(var i=0;i<nodes.length;i++) {
-                    if(!~nodes[i].textContent.search(new RegExp(term,'gi'))) {
+                    if(!~nodes[i].textContent.search(new RegExp(escapeRegExp(term),'gi'))) {
                         nodes[i].classList.add('hide');
                     } else {
                         nodes[i].classList.remove('hide');
                     }
                 }
-                // searchTime.t1 = window.performance.now();
-                // debugger;
-                // if(searchTime.diffs.length<=10) {
-                //     searchTime.diffs.push(searchTime.t1 - searchTime.t0);
-                // } else {
-                //     searchTime.avg = searchTime.diffs.reduce(function(a,b){return a+b;}).log() / searchTime.diffs.length
-                //     console.log(searchTime.avg);
-                //     searchTime.diffs =[];
-                // }
 
             }
-
-
 
             function antiDoubleClick (fn, delay) {
                 var timeoutID = null;
@@ -223,6 +269,24 @@ function type(a) {
                     }, delay);
                 }
             }
+
+            function escapeRegExp(text) {
+                return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+            }
+
+            function debounce(n, t) {
+                var i;
+                return function() {
+                    var r = this
+                        , u = arguments
+                        , f = function() {
+                        i = null;
+                        n.apply(r, u)
+                    };
+                    clearTimeout(i);
+                    i = setTimeout(f, t)
+                }
+            }
         });
 
 
@@ -236,9 +300,13 @@ function type(a) {
             placeholder:'Enter 3 characters at least'
         },
         ajax: {
-            url: false
+            url: false,
+            delay: 500,
+            minChars:3,
+            preloader: '<div class="cssload-container">\
+	                        <div class="cssload-item cssload-moon"></div>\
+                        </div>',
         }
     }
 
 })(jQuery);
-

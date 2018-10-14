@@ -1,10 +1,7 @@
+@import 'preloader';
 .pSelect {
   position:relative;
   font-family: "Raleway", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-
-  .hide {
-    display:none;
-  }
 
   //ironically we don't need selection here :)
   -webkit-touch-callout: none;
@@ -13,6 +10,29 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+
+  .hide {
+    display:none;
+  }
+
+  .pSelect-preloader {
+    display:inline-block;
+    position:absolute;
+    right:11px;
+    top:9px;
+    opacity:0;
+    visibility:hidden;
+
+    -webkit-transition:all .3s ease-in-out;
+    -moz-transition:all .3s ease-in-out;
+    -o-transition:all .3s ease-in-out;
+    transition:all .3s ease-in-out;
+
+    &.loading {
+      visibility: visible;
+      opacity:1;
+    }
+  }
 
   .pSelect-box {
     display: inline-block;
