@@ -11,6 +11,10 @@
   -ms-user-select: none;
   user-select: none;
 
+  &.pSelect-rtl {
+    direction:rtl;
+  }
+
   .hide {
     display:none;
   }
@@ -27,6 +31,11 @@
     -moz-transition:all .3s ease-in-out;
     -o-transition:all .3s ease-in-out;
     transition:all .3s ease-in-out;
+
+    @at-root .pSelect-rtl#{&} {
+      right:initial;
+      left:11px;
+    }
 
     &.loading {
       visibility: visible;

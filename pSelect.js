@@ -19,6 +19,9 @@ function type(a) {
 
             //create new pSelect container
             var $pSelect = $("<div>", {class: "pSelect"});
+            if( options.rtl ) {
+                $pSelect.addClass('pSelect-rtl');
+            }
             $pSelect.insertAfter(this)
             $pSelect.css({
                 'font-size':    options.baseSize,
@@ -294,6 +297,7 @@ function type(a) {
     };
     $.fn.pSelect.defaults = {
         baseSize: 14,
+        rtl: false,
         align: 'center',
         search: {
             enable: true,
